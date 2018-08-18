@@ -1,0 +1,13 @@
+{
+    "model_name": "self_driving_car",
+    "datasets_root": "data/",
+
+    "parts_config": [{
+        "part_name": "traffic_sign_classifier",
+        "dataset_train": "traffic_signs/train",
+        "dataset_test": "traffic_signs/test",
+        "properties": {
+            "img_size": 50
+        }
+    }]
+}

@@ -5,4 +5,6 @@ from tqdm import tqdm
 from random import shuffle
 
 # loading config
-from services.config import Config as config
+from other.config import Config
+
+config = Config('config.json')
