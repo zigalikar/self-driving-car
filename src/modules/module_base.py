@@ -8,5 +8,12 @@ class ModuleBase:
         self.config = config
 
         self.path_train, self.path_test = util.construct_dataset_paths(module_name, config)
+        # self.dataset_train, self.dataset_test = util.load_data(self.path_train, self.path_test)
 
-        print('Module \'' + module_name + '\' init successful.')
+        # Accessing features and labels
+        # X_train, y_train = train['features'], train['labels']
+        # X_test, y_test = test['features'], test['labels']
+
+    
+    def outputModuleInit(self):
+        util.log('Module \'' + self.module_name + '\' init successful.')

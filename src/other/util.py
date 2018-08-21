@@ -11,7 +11,7 @@ def extract_module_config(config, module_name):
         if module['module_name'] == module_name:
             return module
 
-    print('Failed to extract module config from config file.')
+    log('Failed to extract module config from config file.')
 
 def load_data(path_train, path_test):
     with open(path_train, mode='rb') as f:
@@ -21,3 +21,7 @@ def load_data(path_train, path_test):
         test = pickle.load(f)
 
     return train, test
+
+# Wrapper - adding functionality later (writing to file, formatting)
+def log(msg):
+    print(msg)
