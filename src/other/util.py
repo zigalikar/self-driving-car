@@ -13,14 +13,11 @@ def extract_module_config(config, module_name):
 
     log('Failed to extract module config from config file.')
 
-def load_data(path_train, path_test):
-    with open(path_train, mode='rb') as f:
-        train = pickle.load(f)
-    
-    with open(path_test, mode='rb') as f:
-        test = pickle.load(f)
+def load_pickle_data(path):
+    with open(path, mode='rb') as f:
+        data = pickle.load(f)
 
-    return train, test
+    return data
 
 # Wrapper - adding functionality later (writing to file, formatting)
 def log(msg):
