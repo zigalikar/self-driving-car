@@ -1,11 +1,11 @@
 {
     "model_name": "self_driving_car",
-    "datasets_root": "data/",
+    "datasets_root": "data\\",
 
     "modules_config": [{
         "module_name": "traffic_sign_classifier",
-        "dataset_train": "traffic_signs/train",
-        "dataset_test": "traffic_signs/test",
+        "dataset_train": "traffic_signs\\train",
+        "dataset_test": "traffic_signs\\test",
         "properties": {
             "img_size": 50
         }
