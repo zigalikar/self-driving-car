@@ -12,14 +12,16 @@ class ModuleBase:
         self.config = config
 
         self.path_train, self.path_test = util.construct_dataset_paths(module_name, config)
-        self.prepare_dataset()
+        self.prepare_dataset() # TODO: check if weights exist and attempt to load them
 
         self.outputModuleInit()
 
+    # Prepares the dataset for usage
     def prepare_dataset(self):
         pickle_train = path.join(self.path_train, "..", self.module_name + ".train.p")
         pickle_test = path.join(self.path_test, "..", self.module_name + ".test.p")
 
+        # Loading training dataset
         if path.isfile(pickle_train):
             self.module_log('Loading training set from pickle file.')
             self.dataset_train = p.load(pickle_train)
@@ -28,6 +30,7 @@ class ModuleBase:
             data = self.loader.load(self.path_train)
             self.dataset_train = p.save(data, pickle_train)
 
+        # Loading testing dataset
         if path.isfile(pickle_test):
             self.module_log('Loading test set from pickle file.')
             self.dataset_test = p.load(pickle_test)
@@ -36,10 +39,12 @@ class ModuleBase:
             data = self.loader.load(self.path_test)
             self.dataset_test = p.save(data, pickle_test)
     
+    # Outputs an initialization message
     def outputModuleInit(self):
         self.module_log('\033[92mModule init successful.\033[0m')
         # self.module_log("Training dataset size: ", self.dataset_train['features'].shape[0])
         # self.module_log("Testing dataset size: ", self.dataset_test['features'].shape[0])
 
+    # Wrapper - logs a message with the appropriate module ticker
     def module_log(self, msg):
         util.log('[' + self.module_name + ']: ' + msg)
