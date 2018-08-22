@@ -1,4 +1,7 @@
 class LoaderInterface:
 
-    def load(input):
+    def __init__(self):
+        pass
+
+    def load(self, input):
         raise NotImplementedError('Load function not implemented.')

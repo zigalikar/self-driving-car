@@ -10,5 +10,8 @@ from other.config import Config
 # Loading modules
 from modules.traffic_sign_classifier.traffic_sign_classifier import TrafficSignClassifier
 
+# Loading loaders
+from loaders.tfc_loader import TfcLoader
+
 config = Config('config.json')
-tfc = TrafficSignClassifier('traffic_sign_classifier', config)
+tfc = TrafficSignClassifier('traffic_sign_classifier', TfcLoader(), config)
