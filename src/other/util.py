@@ -2,9 +2,7 @@ import pickle
 
 # Wrapper function for constructing paths leading to dataset files
 def construct_dataset_paths(module_name, config):
-    module_config = extract_module_config(config, module_name)
-
-    return config.datasets_root + module_config['dataset_train'], config.datasets_root + module_config['dataset_test']
+    return config.datasets_root + module_name + '\\train', config.datasets_root + module_name + '\\test'
 
 # Extracts module config from passed global config
 def extract_module_config(config, module_name):

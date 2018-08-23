@@ -4,8 +4,6 @@
 
     "modules_config": [{
         "module_name": "traffic_sign_classifier",
-        "dataset_train": "traffic_signs\\train",
-        "dataset_test": "traffic_signs\\test",
         "properties": {
             "img_size": 50
         }
