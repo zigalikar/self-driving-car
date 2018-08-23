@@ -105,5 +105,4 @@ venv.bak/
 .vscode/
 
 # Datasets
-data/*/test/
-data/*/train/
+data/
