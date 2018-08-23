@@ -1,3 +1,7 @@
+
+import tensorflow as tf
+from tensorflow.contrib.layers import flatten
+
 from modules.module_base import ModuleBase
 
 class TrafficSignClassifier(ModuleBase):

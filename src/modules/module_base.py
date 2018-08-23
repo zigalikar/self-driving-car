@@ -21,23 +21,19 @@ class ModuleBase:
         pickle_train = path.join(self.path_train, "..", self.module_name + ".train.p")
         pickle_test = path.join(self.path_test, "..", self.module_name + ".test.p")
 
-        # Loading training dataset
-        if path.isfile(pickle_train):
-            self.module_log('Loading training set from pickle file.')
-            self.dataset_train = p.load(pickle_train)
+        self.dataset_train = self.load_dataset(pickle_train, self.path_train)
+        self.dataset_test = self.load_dataset(pickle_test, self.path_test)
+    
+    # Loads a dataset from a pickled file or a dataset if pickle doesn't exist
+    def load_dataset(self, pickle_path, dataset_path):
+        if path.isfile(pickle_path):
+            self.module_log('Loading dataset from pickle file: \'' + pickle_path + '\'')
+            return p.load(pickle_path)
         else:
-            self.module_log('Training pickle file does not exist - loading from dataset.')
-            data = self.loader.load(self.path_train)
-            self.dataset_train = p.save(data, pickle_train)
-
-        # Loading testing dataset
-        if path.isfile(pickle_test):
-            self.module_log('Loading test set from pickle file.')
-            self.dataset_test = p.load(pickle_test)
-        else:
-            self.module_log('Test pickle file does not exist - loading from dataset.')
-            data = self.loader.load(self.path_test)
-            self.dataset_test = p.save(data, pickle_test)
+            self.module_log('Dataset pickle file does not exist - loading from dataset: \'' + dataset_path + '\'')
+            data = self.loader.load(dataset_path)
+            p.save(data, pickle_path)
+            return data
     
     # Outputs an initialization message
     def outputModuleInit(self):
