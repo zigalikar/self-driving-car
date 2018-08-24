@@ -2,6 +2,7 @@
     "model_name": "self_driving_car",
     "datasets_root": "data\\",
     "weights_root": "weights\\",
+    "epochs_log": "epoch-accuracies.txt",
 
     "modules_config": [{
         "module_name": "traffic_sign_classifier",
@@ -10,7 +11,8 @@
             "batch_size": 128,
             "epochs": 5,
             " batches_per_epoch": 5000,
-            "batches_per_epoch": 300,
+            " batches_per_epoch": 300,
+            "batches_per_epoch": 5,
             "keep_prob_train": 0.5,
             "keep_prob_eval": 1.0,
             "val_ratio": 0.2

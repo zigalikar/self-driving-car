@@ -1,5 +1,6 @@
 import cv2
 
+import os.path as path
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
 from sklearn.model_selection import train_test_split
@@ -7,6 +8,7 @@ from keras.preprocessing.image import ImageDataGenerator
 
 import numpy as np
 
+import other.util as util
 from modules.module_base import ModuleBase
 from other.util import construct_weights_path
 from modules.traffic_sign_classifier.traffic_sign_classifier_util import TrafficSignClassifierUtil as tfcu
@@ -35,33 +37,37 @@ class TrafficSignClassifier(ModuleBase):
 
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
+            log_path = path.join(construct_weights_path(self.module_name, self.config), self.config.epochs_log)
 
-            for epoch in range(epochs):
-                print("Starting epoch nr. {}".format(epoch + 1))
-                batch_counter = 0
+            with open(log_path, 'w') as f:
+                for epoch in range(epochs):
+                    util.log("Starting epoch {0}/{1}".format(epoch + 1, epochs))
+                    batch_counter = 0
 
-                for batch_x, batch_y in self.image_datagen.flow(x_train, y_train, batch_size=batch_size):
-                    batch_counter += 1
-                    sess.run(self.training_pipeline['train_step'], feed_dict={ x: batch_x, y: batch_y, keep_prob: self.get_property('keep_prob_train') })
-                    print('Processing batch {0}/{1} - {2}% complete             '.format(batch_counter, batches_per_epoch, batch_counter / batches_per_epoch * 100), end='\r')
+                    for batch_x, batch_y in self.image_datagen.flow(x_train, y_train, batch_size=batch_size):
+                        batch_counter += 1
+                        sess.run(self.training_pipeline['train_step'], feed_dict={ x: batch_x, y: batch_y, keep_prob: self.get_property('keep_prob_train') })
+                        print('Processing batch {0}/{1} - {2:.2f}% complete             '.format(batch_counter, batches_per_epoch, batch_counter / batches_per_epoch * 100), end='\r')
 
-                    if batch_counter == batches_per_epoch:
-                        break
+                        if batch_counter == batches_per_epoch:
+                            break
 
-                train_accuracy = self.evaluate(x_train, y_train)
-                val_accuracy = self.evaluate(x_val, y_val)
-                print()
-                print('Train accuracy: {:.3f} | Validation accuracy: {:.3f}'.format(train_accuracy, val_accuracy))
-                
-                path = construct_weights_path(self.module_name, epoch, self.config)
-                self.saver.save(sess, save_path=path, global_step=epoch)
+                    util.log()
+                    train_accuracy = self.evaluate(x_train, y_train, eval_type='training')
+                    val_accuracy = self.evaluate(x_val, y_val, eval_type='validation')
+                    result = 'Epoch {} -- Train accuracy: {:.3f} | Validation accuracy: {:.3f}\n'.format(epoch, train_accuracy, val_accuracy)
+                    util.log(result)
+                    f.write(result)
+                    
+                    weights_path = construct_weights_path(self.module_name, self.config, epoch)
+                    self.saver.save(sess, save_path=weights_path, global_step=epoch)
     
     # Tests the model on the test set
     def test(self, test: tuple):
         x_test, y_test = test[0], test[1]
 
         with tf.Session() as sess:
-            path = construct_weights_path(self.module_name, 20, self.config) # load weights from epoch 20
+            path = construct_weights_path(self.module_name, self.config, 3) # load weights from epoch 3
 
             if self.saver is not None:
                 self.saver.restore(sess, path)
@@ -114,17 +120,20 @@ class TrafficSignClassifier(ModuleBase):
         return self.placeholders
     
     # Evaluates the inputs with the correct outputs
-    def evaluate(self, x, y):    
-        num_examples = x.shape[0]
+    def evaluate(self, data_x, data_y, eval_type='training'):
+        x, y, keep_prob = self.placeholders['x'], self.placeholders['y'], self.placeholders['keep_prob']
+        num_examples = data_x.shape[0]
         total_accuracy = 0
         batch_size = self.get_property('batch_size')
 
         sess = tf.get_default_session()
         for offset in range(0, num_examples, batch_size):
-            batch_x, batch_y = x[offset:offset+batch_size], y[offset:offset+batch_size]
-            accuracy = sess.run(self.training_pipeline['accuracy_operation'], feed_dict={x: batch_x, y: batch_y, keep_prob: self.get_property('keep_prob_evl')})
+            print('Evaluating epoch - {0}: {1}/{2} - {3:.2f}% complete                '.format(eval_type, offset, num_examples, offset / num_examples * 100), end='\r')
+            batch_x, batch_y = data_x[offset:offset+batch_size], data_y[offset:offset+batch_size]
+            accuracy = sess.run(self.training_pipeline['accuracy_operation'], feed_dict={ x: batch_x, y: batch_y, keep_prob: self.get_property('keep_prob_eval') })
             total_accuracy += accuracy * len(batch_x)
-            
+        
+        util.log()
         return total_accuracy / num_examples
     
     # Runs the input through the neural network and returns the logits
