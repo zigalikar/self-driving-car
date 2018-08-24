@@ -6,9 +6,9 @@ import os.path as path
 def construct_dataset_paths(module_name, config):
     return config.datasets_root + module_name + '\\train', config.datasets_root + module_name + '\\test'
 
-def construct_weights_path(module_name, config, epoch=''):
-    if epoch != '':
-        return path.join(config.weights_root, module_name, 'weights-' + str(epoch) + '.ckpt')
+def construct_weights_path(module_name, config, return_root=False):
+    if return_root == False:
+        return path.join(config.weights_root, module_name + '\\weights.ckpt')
 
     return path.join(config.weights_root, module_name)
 
@@ -25,10 +25,10 @@ def extract_module_config(config, module_name):
     log('Failed to extract module config from config file.')
 
 # Wrapper - adding functionality later (writing to file, formatting)
-def log(msg = ''):
-    if len(msg) > 0:
+def log(msg = '', end='\n', log_to_file=True):
+    if len(msg) > 0 and log_to_file == True:
         with open('logs/main-log.txt', 'a') as f: # TODO: log path to config
             file_entry = '({0}) - {1}\n'.format(datetime.now(), msg)
             f.write(file_entry)
 
-    print(msg)
+    print(msg, end=end)

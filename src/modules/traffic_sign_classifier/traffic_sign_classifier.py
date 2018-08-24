@@ -18,10 +18,9 @@ class TrafficSignClassifier(ModuleBase):
     def __init__(self, module_name, loader, config):
         super().__init__(module_name, loader, config)
 
-        self.placeholders = self.init_pipeline()
-    
     # Initializes the training process
     def init_training(self):
+        self.placeholders = self.init_pipeline()
         x_norm, x_val, y_norm, y_val = self.get_train_test_split(self.dataset_train['features'], self.dataset_train['labels'])
 
         self.train((x_norm, y_norm), (x_val, y_val))
@@ -37,17 +36,17 @@ class TrafficSignClassifier(ModuleBase):
 
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
-            log_path = path.join(construct_weights_path(self.module_name, self.config), self.config.epochs_log)
+            log_path = path.join(construct_weights_path(self.module_name, self.config, return_root=True), self.config.epochs_log)
 
             with open(log_path, 'w') as f:
                 for epoch in range(epochs):
-                    util.log("Starting epoch {0}/{1}".format(epoch + 1, epochs))
+                    self.module_log("\033[94m---- Starting epoch {0}/{1} ----\033[0m".format(epoch + 1, epochs))
                     batch_counter = 0
 
                     for batch_x, batch_y in self.image_datagen.flow(x_train, y_train, batch_size=batch_size):
                         batch_counter += 1
                         sess.run(self.training_pipeline['train_step'], feed_dict={ x: batch_x, y: batch_y, keep_prob: self.get_property('keep_prob_train') })
-                        print('Processing batch {0}/{1} - {2:.2f}% complete             '.format(batch_counter, batches_per_epoch, batch_counter / batches_per_epoch * 100), end='\r')
+                        self.module_log('Processing batch {0}/{1} - {2:.2f}% complete             '.format(batch_counter, batches_per_epoch, batch_counter / batches_per_epoch * 100), end='\r', log_to_file=False)
 
                         if batch_counter == batches_per_epoch:
                             break
@@ -55,11 +54,11 @@ class TrafficSignClassifier(ModuleBase):
                     util.log()
                     train_accuracy = self.evaluate(x_train, y_train, eval_type='training')
                     val_accuracy = self.evaluate(x_val, y_val, eval_type='validation')
-                    result = 'Epoch {} -- Train accuracy: {:.3f} | Validation accuracy: {:.3f}\n'.format(epoch, train_accuracy, val_accuracy)
-                    util.log(result)
-                    f.write(result)
+                    result = 'Epoch {} -- Train accuracy: {:.3f} | Validation accuracy: {:.3f}'.format(epoch, train_accuracy, val_accuracy)
+                    self.module_log(result)
+                    f.write(result + '\n')
                     
-                    weights_path = construct_weights_path(self.module_name, self.config, epoch)
+                    weights_path = construct_weights_path(self.module_name, self.config)
                     self.saver.save(sess, save_path=weights_path, global_step=epoch)
     
     # Tests the model on the test set
@@ -128,7 +127,7 @@ class TrafficSignClassifier(ModuleBase):
 
         sess = tf.get_default_session()
         for offset in range(0, num_examples, batch_size):
-            print('Evaluating epoch - {0}: {1}/{2} - {3:.2f}% complete                '.format(eval_type, offset, num_examples, offset / num_examples * 100), end='\r')
+            self.module_log('Evaluating epoch - {0}: {1}/{2} - {3:.2f}% complete                '.format(eval_type, offset, num_examples, offset / num_examples * 100), end='\r', log_to_file=False)
             batch_x, batch_y = data_x[offset:offset+batch_size], data_y[offset:offset+batch_size]
             accuracy = sess.run(self.training_pipeline['accuracy_operation'], feed_dict={ x: batch_x, y: batch_y, keep_prob: self.get_property('keep_prob_eval') })
             total_accuracy += accuracy * len(batch_x)

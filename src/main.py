@@ -16,4 +16,3 @@ from loaders.tfc_loader import TfcLoader
 # Initializing config and modules
 config = Config('config.json')
 tfc = TrafficSignClassifier('traffic_sign_classifier', TfcLoader(), config)
-tfc.init_training()

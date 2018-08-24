@@ -14,10 +14,11 @@ class ModuleBase:
         self.config = config
         self.module_config = util.extract_module_config(config, module_name)
 
+        # TODO: check if weights exist and attempt to load them instead of loading the dataset
         self.path_train, self.path_test = util.construct_dataset_paths(module_name, config)
-        self.prepare_dataset() # TODO: check if weights exist and attempt to load them
-
-        self.outputModuleInit()
+        self.prepare_dataset()
+        self.init_training()
+        self.output_module_init() # TODO: the output changes depending on whether we load the weights or the dataset
 
     # Prepares the dataset for usage
     def prepare_dataset(self):
@@ -35,9 +36,13 @@ class ModuleBase:
             data = self.loader.load(dataset_path)
             p.save(data, pickle_path)
             return data
-        
+    
+    # Abstract function that is overriden in each module
+    def init_training():
+        raise NotImplementedError()
+
     # Outputs an initialization message
-    def outputModuleInit(self):
+    def output_module_init(self):
         self.module_log('\033[92m================== Module init successful ==================\033[0m')
         self.module_log('Training dataset size: ' + str(self.dataset_train['features'].shape[0]))
         self.module_log('Testing dataset size: ' + str(self.dataset_test['features'].shape[0]))
@@ -48,5 +53,5 @@ class ModuleBase:
         return self.module_config['properties'][prop]
 
     # Wrapper - logs a message with the appropriate module ticker
-    def module_log(self, msg):
-        util.log('[' + self.module_name + ']: ' + msg)
+    def module_log(self, msg, end='\n', log_to_file=True):
+        util.log('[' + self.module_name + ']: ' + msg, end=end, log_to_file=log_to_file)
