@@ -42,6 +42,10 @@ class ModuleBase:
         self.module_log('Training dataset size: ' + str(self.dataset_train['features'].shape[0]))
         self.module_log('Testing dataset size: ' + str(self.dataset_test['features'].shape[0]))
         self.module_log('Classifying into ' + str(np.unique(self.dataset_train['labels']).shape[0]) + ' classes.')
+    
+    # Returns the module property by index
+    def get_property(self, prop):
+        return self.module_config['properties'][prop]
 
     # Wrapper - logs a message with the appropriate module ticker
     def module_log(self, msg):
