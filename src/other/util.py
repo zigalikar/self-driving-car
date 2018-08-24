@@ -1,13 +1,16 @@
 import pickle
-
+from datetime import datetime
 import os.path as path
 
 # Wrapper function for constructing paths leading to dataset files
 def construct_dataset_paths(module_name, config):
     return config.datasets_root + module_name + '\\train', config.datasets_root + module_name + '\\test'
 
-def construct_weights_path(module_name, epoch, config):
-    return path.join(config.weights_root, module_name, '-', epoch, '.ckpt')
+def construct_weights_path(module_name, config, epoch=''):
+    if epoch != '':
+        return path.join(config.weights_root, module_name, 'weights-' + str(epoch) + '.ckpt')
+
+    return path.join(config.weights_root, module_name)
 
 def construct_pickle_paths(module_name, config):
     path_train, path_test = construct_dataset_paths(module_name, config)
@@ -22,5 +25,10 @@ def extract_module_config(config, module_name):
     log('Failed to extract module config from config file.')
 
 # Wrapper - adding functionality later (writing to file, formatting)
-def log(msg):
+def log(msg = ''):
+    if len(msg) > 0:
+        with open('logs/main-log.txt', 'a') as f: # TODO: log path to config
+            file_entry = '({0}) - {1}\n'.format(datetime.now(), msg)
+            f.write(file_entry)
+
     print(msg)
