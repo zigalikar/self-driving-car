@@ -21,9 +21,7 @@ class ModuleBase:
 
     # Prepares the dataset for usage
     def prepare_dataset(self):
-        pickle_train = path.join(self.path_train, "..", self.module_name + ".train.p")
-        pickle_test = path.join(self.path_test, "..", self.module_name + ".test.p")
-
+        pickle_train, pickle_test = util.construct_pickle_paths(self.module_name, self.config)
         self.dataset_train = self.load_dataset(pickle_train, self.path_train)
         self.dataset_test = self.load_dataset(pickle_test, self.path_test)
     
