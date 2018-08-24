@@ -1,5 +1,7 @@
 import os.path as path
 
+import numpy as np
+
 import other.util as util
 import other.pickler as p
 
@@ -10,6 +12,7 @@ class ModuleBase:
         self.module_name = module_name
         self.loader = loader
         self.config = config
+        self.module_config = util.extract_module_config(config, module_name)
 
         self.path_train, self.path_test = util.construct_dataset_paths(module_name, config)
         self.prepare_dataset() # TODO: check if weights exist and attempt to load them
@@ -34,12 +37,13 @@ class ModuleBase:
             data = self.loader.load(dataset_path)
             p.save(data, pickle_path)
             return data
-    
+        
     # Outputs an initialization message
     def outputModuleInit(self):
-        self.module_log('\033[92mModule init successful.\033[0m')
-        # self.module_log("Training dataset size: ", self.dataset_train['features'].shape[0])
-        # self.module_log("Testing dataset size: ", self.dataset_test['features'].shape[0])
+        self.module_log('\033[92m================== Module init successful ==================\033[0m')
+        self.module_log('Training dataset size: ' + str(self.dataset_train['features'].shape[0]))
+        self.module_log('Testing dataset size: ' + str(self.dataset_test['features'].shape[0]))
+        self.module_log('Classifying into ' + str(np.unique(self.dataset_train['labels']).shape[0]) + ' classes.')
 
     # Wrapper - logs a message with the appropriate module ticker
     def module_log(self, msg):
