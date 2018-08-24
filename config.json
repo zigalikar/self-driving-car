@@ -10,7 +10,8 @@
             "batch_size": 128,
             "epochs": 30,
             "batches_per_epoch": 5000,
-            "keep_prob": 1.0
+            "keep_prob_train": 0.5,
+            "keep_prob_eval": 1.0
         }
     }]
 }
