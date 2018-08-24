@@ -1,11 +1,16 @@
 {
     "model_name": "self_driving_car",
     "datasets_root": "data\\",
+    "weights_root": "weights\\",
 
     "modules_config": [{
         "module_name": "traffic_sign_classifier",
         "properties": {
-            "img_size": 50
+            "lr": 0.001,
+            "batch_size": 128,
+            "epochs": 30,
+            "batches_per_epoch": 5000,
+            "keep_prob": 1.0
         }
     }]
 }
