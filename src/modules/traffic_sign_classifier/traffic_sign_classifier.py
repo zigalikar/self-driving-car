@@ -17,12 +17,18 @@ class TrafficSignClassifier(ModuleBase):
 
     def __init__(self, module_name, loader, config):
         super().__init__(module_name, loader, config)
+        
+        self.placeholders = self.init_pipeline()
+        
+        if self.weights_path == None:
+            self.init_training()
+        else:
+            test_x, test_y = self.preprocess(self.dataset_test['features']), self.dataset_test['labels']
+            self.test((test_x, test_y))
 
     # Initializes the training process
-    def init_training(self):
-        self.placeholders = self.init_pipeline()
+    def init_training(self):        
         x_norm, x_val, y_norm, y_val = self.get_train_test_split(self.dataset_train['features'], self.dataset_train['labels'])
-
         self.train((x_norm, y_norm), (x_val, y_val))
     
     # Trains the model on the training set
@@ -54,7 +60,7 @@ class TrafficSignClassifier(ModuleBase):
                     util.log()
                     train_accuracy = self.evaluate(x_train, y_train, eval_type='training')
                     val_accuracy = self.evaluate(x_val, y_val, eval_type='validation')
-                    result = 'Epoch {} -- Train accuracy: {:.3f} | Validation accuracy: {:.3f}'.format(epoch, train_accuracy, val_accuracy)
+                    result = 'Epoch {} -- Train accuracy: {:.3f} | Validation accuracy: {:.3f}'.format(epoch + 1, train_accuracy, val_accuracy)
                     self.module_log(result)
                     f.write(result + '\n')
                     
@@ -65,14 +71,26 @@ class TrafficSignClassifier(ModuleBase):
     def test(self, test: tuple):
         x_test, y_test = test[0], test[1]
 
-        with tf.Session() as sess:
-            path = construct_weights_path(self.module_name, self.config, 3) # load weights from epoch 3
+        if self.weights_path != None:
+            with tf.Session() as sess:
+                path = self.get_latest_weights()
 
-            if self.saver is not None:
-                self.saver.restore(sess, path)
-                
-                acc = self.evaluate(x_test, y_test)
-                self.module_log('Accuracy on testing dataset: {:.3f}'.format(acc))
+                if self.saver is not None and path != None:
+                    self.saver.restore(sess, path)
+                    
+                    acc = self.evaluate(x_test, y_test, 'testing')
+                    self.module_log('Accuracy on testing dataset: {:.3f}%'.format(acc * 100))
+
+    # Returns the latest weights file path, TODO: get best weights file path
+    def get_latest_weights(self):
+        root_path = construct_weights_path(self.module_name, self.config, return_root=True)
+
+        if self.weights_path != None:
+            with open(self.weights_path, 'r') as f:
+                epochs = f.read().split('\n')
+                return path.join(root_path, epochs[-2].split('"')[1])
+
+        return None
 
     # Preprocesses the data
     def preprocess(self, x):
@@ -111,11 +129,10 @@ class TrafficSignClassifier(ModuleBase):
             zoom_range=0.2,
             width_shift_range=0.1,
             height_shift_range=0.1)
-
+            
         self.saver = tf.train.Saver()
-        self.placeholders = { 'x': x, 'y': y, 'keep_prob': keep_prob }
         self.training_pipeline = { 'train_step': train_step, 'accuracy_operation': accuracy_operation }
-
+        self.placeholders = { 'x': x, 'y': y, 'keep_prob': keep_prob }
         return self.placeholders
     
     # Evaluates the inputs with the correct outputs

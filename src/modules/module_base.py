@@ -15,10 +15,14 @@ class ModuleBase:
         self.module_config = util.extract_module_config(config, module_name)
 
         # TODO: check if weights exist and attempt to load them instead of loading the dataset
+        weights_path = util.construct_weights_path(module_name, config, return_root=True)
+        ckpt = path.join(weights_path, 'checkpoint')
         self.path_train, self.path_test = util.construct_dataset_paths(module_name, config)
         self.prepare_dataset()
-        self.init_training()
-        self.output_module_init() # TODO: the output changes depending on whether we load the weights or the dataset
+        
+        self.output_module_init(pretrained=path.isfile(ckpt))
+        if path.isfile(ckpt):
+            self.weights_path = ckpt
 
     # Prepares the dataset for usage
     def prepare_dataset(self):
@@ -38,15 +42,23 @@ class ModuleBase:
             return data
     
     # Abstract function that is overriden in each module
-    def init_training():
+    def init_training(self):
+        raise NotImplementedError()
+
+    # Abstract function that is overriden in each module
+    def load_model(self):
         raise NotImplementedError()
 
     # Outputs an initialization message
-    def output_module_init(self):
+    def output_module_init(self, pretrained):
         self.module_log('\033[92m================== Module init successful ==================\033[0m')
-        self.module_log('Training dataset size: ' + str(self.dataset_train['features'].shape[0]))
-        self.module_log('Testing dataset size: ' + str(self.dataset_test['features'].shape[0]))
-        self.module_log('Classifying into ' + str(np.unique(self.dataset_train['labels']).shape[0]) + ' classes.')
+
+        if pretrained:
+            self.module_log('Loading model weights from file - skipping model training.')
+        else:
+            self.module_log('Training dataset size: ' + str(self.dataset_train['features'].shape[0]))
+            self.module_log('Testing dataset size: ' + str(self.dataset_test['features'].shape[0]))
+            self.module_log('Classifying into ' + str(np.unique(self.dataset_train['labels']).shape[0]) + ' classes.')
     
     # Returns the module property by index
     def get_property(self, prop):
