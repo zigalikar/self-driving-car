@@ -20,11 +20,17 @@ class TrafficSignClassifier(ModuleBase):
         
         self.placeholders = self.init_pipeline()
         
-        if self.weights_path == None:
-            self.init_training()
-        else:
+        weights_path = util.construct_weights_path(module_name, config, return_root=True)
+        ckpt = path.join(weights_path, 'checkpoint')
+        
+        self.output_module_init(pretrained=path.isfile(ckpt))
+        if path.isfile(ckpt):
             test_x, test_y = self.preprocess(self.dataset_test['features']), self.dataset_test['labels']
+            
+            self.weights_path = ckpt
             self.test((test_x, test_y))
+        else:
+            self.init_training()            
 
     # Initializes the training process
     def init_training(self):        

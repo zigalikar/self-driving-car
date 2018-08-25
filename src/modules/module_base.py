@@ -14,15 +14,8 @@ class ModuleBase:
         self.config = config
         self.module_config = util.extract_module_config(config, module_name)
 
-        # TODO: check if weights exist and attempt to load them instead of loading the dataset
-        weights_path = util.construct_weights_path(module_name, config, return_root=True)
-        ckpt = path.join(weights_path, 'checkpoint')
         self.path_train, self.path_test = util.construct_dataset_paths(module_name, config)
         self.prepare_dataset()
-        
-        self.output_module_init(pretrained=path.isfile(ckpt))
-        if path.isfile(ckpt):
-            self.weights_path = ckpt
 
     # Prepares the dataset for usage
     def prepare_dataset(self):
