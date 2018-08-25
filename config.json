@@ -6,13 +6,12 @@
 
     "modules_config": [{
         "module_name": "traffic_sign_classifier",
+        "other_test_samples": "other",
         "properties": {
             "lr": 0.001,
             "batch_size": 128,
-            "epochs": 5,
-            " batches_per_epoch": 5000,
-            " batches_per_epoch": 300,
-            "batches_per_epoch": 5,
+            "epochs": 30,
+            "batches_per_epoch": 5000,
             "keep_prob_train": 0.5,
             "keep_prob_eval": 1.0,
             "val_ratio": 0.2
