@@ -3,6 +3,7 @@ import cv2
 import os
 import os.path as path
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from tensorflow.contrib.layers import flatten
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.image import ImageDataGenerator
@@ -29,7 +30,7 @@ class TrafficSignClassifier(ModuleBase):
             test_x, test_y = self.preprocess(self.dataset_test['features']), self.dataset_test['labels']
             
             self.weights_path = ckpt
-            # self.test((test_x, test_y))
+            self.test((test_x, test_y))
             self.predict()
         else:
             self.init_training()            
@@ -93,10 +94,35 @@ class TrafficSignClassifier(ModuleBase):
     def predict(self):
         other_dir = path.join(util.construct_dataset_paths(self.module_name, self.config)[0], '..\\' + self.module_config['other_test_samples'])
         imgs = [path.join(other_dir, f) for f in os.listdir(other_dir)]
-        imgs = [cv2.cvtColor(cv2.imread(f), cv2.COLOR_BGR2RGB) for f in imgs]
+        imgs = [cv2.resize(cv2.cvtColor(cv2.imread(f), cv2.COLOR_BGR2RGB), (32, 32)) for f in imgs] # TODO: 32x32 to config
+        new_targets = [0, 14, 17, 39, 31]
 
-        # manually annotated labels for these new images
-        new_targets = [1, 13, 17, 35, 40]
+        fig, axarray = plt.subplots(1, len(imgs))
+        for i, ax in enumerate(axarray.ravel()):
+            ax.imshow(imgs[i])
+            ax.set_title('{}'.format(i))
+            plt.setp(ax.get_xticklabels(), visible=False)
+            plt.setp(ax.get_yticklabels(), visible=False)
+            ax.set_xticks([]), ax.set_yticks([])
+
+        x, keep_prob = self.placeholders['x'], self.placeholders['keep_prob']
+        logits = self.get_logits(x, keep_prob)
+        imgs_norm = self.preprocess(imgs)
+        if self.weights_path != None:
+            with tf.Session() as sess:
+                sess.run(tf.global_variables_initializer())
+                w_path = self.get_latest_weights()
+
+                if self.saver is not None and w_path != None:
+                    self.saver.restore(sess, w_path)
+                    prediction = np.argmax(np.array(sess.run(logits, feed_dict={x: imgs_norm, keep_prob: 1.})), axis=1)
+
+            for i, pred in enumerate(prediction):
+                print('Image {} - Target = {:02d}, Predicted = {:02d}'.format(i, new_targets[i], pred))
+                
+            print('> Model accuracy: {:.02f}'.format(np.sum(new_targets==prediction)/len(new_targets)))
+        
+        plt.show()
 
     # Returns the latest weights file path, TODO: get best weights file path
     def get_latest_weights(self):
