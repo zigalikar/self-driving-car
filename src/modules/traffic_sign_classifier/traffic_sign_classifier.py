@@ -1,5 +1,6 @@
 import cv2
 
+import os
 import os.path as path
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
@@ -28,7 +29,8 @@ class TrafficSignClassifier(ModuleBase):
             test_x, test_y = self.preprocess(self.dataset_test['features']), self.dataset_test['labels']
             
             self.weights_path = ckpt
-            self.test((test_x, test_y))
+            # self.test((test_x, test_y))
+            self.predict()
         else:
             self.init_training()            
 
@@ -86,6 +88,15 @@ class TrafficSignClassifier(ModuleBase):
                     
                     acc = self.evaluate(x_test, y_test, 'testing')
                     self.module_log('Accuracy on testing dataset: {:.3f}%'.format(acc * 100))
+
+    # Returns the predictions of the model of the supplied inputs in the other/ directory
+    def predict(self):
+        other_dir = path.join(util.construct_dataset_paths(self.module_name, self.config)[0], '..\\' + self.module_config['other_test_samples'])
+        imgs = [path.join(other_dir, f) for f in os.listdir(other_dir)]
+        imgs = [cv2.cvtColor(cv2.imread(f), cv2.COLOR_BGR2RGB) for f in imgs]
+
+        # manually annotated labels for these new images
+        new_targets = [1, 13, 17, 35, 40]
 
     # Returns the latest weights file path, TODO: get best weights file path
     def get_latest_weights(self):
