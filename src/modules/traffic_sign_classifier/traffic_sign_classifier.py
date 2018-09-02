@@ -30,7 +30,7 @@ class TrafficSignClassifier(ModuleBase):
             test_x, test_y = self.preprocess(self.dataset_test['features']), self.dataset_test['labels']
             
             self.weights_path = ckpt
-            self.test((test_x, test_y))
+            # self.test((test_x, test_y))
             self.predict()
         else:
             self.init_training()            

@@ -16,5 +16,10 @@
             "keep_prob_eval": 1.0,
             "val_ratio": 0.2
         }
+    }, {
+        "module_name": "lane_recognizer",
+        "properties": {
+            
+        }
     }]
 }
