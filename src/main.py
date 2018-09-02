@@ -17,5 +17,5 @@ from loaders.lr_loader import LrLoader
 
 # Initializing config and modules
 config = Config('config.json')
-# tfc = TrafficSignClassifier('traffic_sign_classifier', TfcLoader(), config)
+tfc = TrafficSignClassifier('traffic_sign_classifier', TfcLoader(), config)
 lrecog = LaneRecognizer('lane_recognizer', LrLoader(), config)

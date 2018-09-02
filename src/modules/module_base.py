@@ -29,10 +29,10 @@ class ModuleBase:
             self.module_log('Loading dataset from pickle file: \'' + pickle_path + '\'')
             return p.load(pickle_path)
         else:
-            self.module_log('Dataset pickle file does not exist - loading from dataset: \'' + dataset_path + '\'')
             data = self.loader.load(dataset_path)
 
             if data is not None:
+                self.module_log('Dataset pickle file does not exist - loading from dataset: \'' + dataset_path + '\'')
                 p.save(data, pickle_path)
             return data
     
