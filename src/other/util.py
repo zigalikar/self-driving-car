@@ -3,8 +3,11 @@ from datetime import datetime
 import os.path as path
 
 # Wrapper function for constructing paths leading to dataset files
-def construct_dataset_paths(module_name, config):
-    return config.datasets_root + module_name + '\\train', config.datasets_root + module_name + '\\test'
+def construct_dataset_paths(module_name, config, return_root=False):
+    if return_root == False:
+        return config.datasets_root + module_name + '\\train', config.datasets_root + module_name + '\\test'
+    else:
+        return config.datasets_root + module_name
 
 def construct_weights_path(module_name, config, return_root=False):
     if return_root == False:

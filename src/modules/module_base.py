@@ -31,7 +31,9 @@ class ModuleBase:
         else:
             self.module_log('Dataset pickle file does not exist - loading from dataset: \'' + dataset_path + '\'')
             data = self.loader.load(dataset_path)
-            p.save(data, pickle_path)
+
+            if data is not None:
+                p.save(data, pickle_path)
             return data
     
     # Abstract function that is overriden in each module
