@@ -21,19 +21,21 @@ class LaneRecognizer(ModuleBase):
     def process_images(self):
         plt.ion()
         module_root_dir = util.construct_dataset_paths(self.module_name, self.config, True)
+        output_root_dir = path.join(module_root_dir, 'output')
         test_images = [path.join(module_root_dir, name) for name in os.listdir(module_root_dir)]
 
         for img in test_images:
             if path.isfile(img):
                 self.module_log('Processing image: ' + img)
 
-                out_path = path.join(module_root_dir, 'output', path.basename(img))
+                out_path = path.join(output_root_dir, path.basename(img))
                 in_image = cv2.cvtColor(cv2.imread(img, cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
                 out_image = self.color_frame_pipeline([in_image], solid_lines=True)
                 cv2.imwrite(out_path, cv2.cvtColor(out_image, cv2.COLOR_RGB2BGR))
                 plt.imshow(out_image)
                 plt.waitforbuttonpress()
         
+        self.module_log('Processed all images - output: ' + output_root_dir)
         plt.close('all')
     
     # Returns a processed image from given list of frames (1 frame == image)
