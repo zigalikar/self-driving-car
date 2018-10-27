@@ -27,3 +27,32 @@ def region_of_interest(image):
     cv2.fillPoly(mask, polygons, 255) # apply the triangle of color 255 (white) on the mask
     masked_image = cv2.bitwise_and(image, mask) # masking the image with the bitwise function
     return masked_image
+
+def make_coordinates(image, line_parameters):
+    slope, intercept = line_parameters # extract the slope and intercept from the parameters
+    y1 = image.shape[0] # height of the image - we want the line to start at the bottom of the image
+    y2 = int(y1 * (3/5)) # the lines go 3/5 of the way to the top of the image
+    x1 = int((y1 - intercept) / slope)
+    x2 = int((y2 - intercept) / slope)
+    return np.array([x1, y1, x2, y2])
+
+## Averages left and right lines to get one left and one right line
+def average_slope_intercept(image, lines):
+    left_fit = []
+    right_fit = []
+    for line in lines:
+        x1, y1, x2, y2 = line.reshape(4)
+        parameters = np.polyfit((x1, x2), (y1, y2), 1) # y = m * x + b -> get the slope and the y intercept
+        slope = parameters[0]
+        intercept = parameters[1]
+        if slope < 0: # left line
+            left_fit.append((slope, intercept))
+        else:
+            right_fit.append((slope, intercept))
+
+    # Average for both sides
+    left_fit_average = np.average(left_fit, axis = 0)
+    right_fit_average = np.average(right_fit, axis = 0)
+    left_line = make_coordinates(image, left_fit_average)
+    right_line = make_coordinates(image, right_fit_average)
+    return np.array([left_line, right_line])

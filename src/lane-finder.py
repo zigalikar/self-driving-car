@@ -13,7 +13,8 @@ lane_image = np.copy(image) # copy so changes on the image we edit do not change
 canny = utils.preprocess(lane_image) # applying the filters to the image
 cropped_image = utils.region_of_interest(canny) # crop the image
 lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength = 40, maxLineGap = 5) # apply the hough transform
-line_image = utils.display_lines(lane_image, lines) # display lines on the black lane image
+average_lines = utils.average_slope_intercept(lane_image, lines)
+line_image = utils.display_lines(lane_image, average_lines) # display lines on the black lane image
 combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1) # combine the original lane image with the lines image
 
 ## Displaying the image
