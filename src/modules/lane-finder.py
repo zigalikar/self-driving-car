@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 def preprocess(image):
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) # converting image to grayscale
     blur = cv2.GaussianBlur(gray, (5, 5), 0) # gaussian blur to reduce noise
@@ -12,6 +14,6 @@ lane_image = np.copy(image) # copy so changes on the image we edit do not change
 lane_image = preprocess(lane_image) # applying the filters to the image
 
 ## Displaying the image
-cv2.imshow('result', lane_image) # show the test image
-cv2.waitKey(0) # wait until a key is pressed to hide the window
+plt.imshow(lane_image) # show the test image
+plt.show() # wait until a key is pressed to hide the window
 
