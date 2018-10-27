@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 
-import matplotlib.pyplot as plt
-
 ## Preprocesses the image
 def preprocess(image):
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) # converting image to grayscale
@@ -29,16 +27,3 @@ def region_of_interest(image):
     cv2.fillPoly(mask, polygons, 255) # apply the triangle of color 255 (white) on the mask
     masked_image = cv2.bitwise_and(image, mask) # masking the image with the bitwise function
     return masked_image
-
-## Loading the test image
-image = cv2.imread('data/lane-finder/lane-finder_test_image.jpg') # loading the image from file
-lane_image = np.copy(image) # copy so changes on the image we edit do not change the original image
-canny = preprocess(lane_image) # applying the filters to the image
-cropped_image = region_of_interest(canny) # crop the image
-lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength = 40, maxLineGap = 5) # apply the hough transform
-line_image = display_lines(lane_image, lines) # display lines on the black lane image
-combo_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1) # combine the original lane image with the lines image
-
-## Displaying the image
-cv2.imshow('result', combo_image) # show the test image
-cv2.waitKey(0) # wait until a key is pressed to hide the window
