@@ -17,7 +17,8 @@ def region_of_interest(image):
     ]) # create the region of interest - an array of polygons (1 polygon) because the fillPoly function requires an array
     mask = np.zeros_like(image) # creates an array of zeros with the same shape as the input image - create a BLACK mask
     cv2.fillPoly(mask, polygons, 255) # apply the triangle of color 255 (white) on the mask
-    return mask
+    masked_image = cv2.bitwise_and(image, mask) # masking the image with the bitwise function
+    return masked_image
 
 ## Loading the test image
 image = cv2.imread('data/lane-finder/lane-finder_test_image.jpg') # loading the image from file
