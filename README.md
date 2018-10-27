@@ -1,3 +1,3 @@
-# Self-driving car using neural networks
+# Self-driving car - practical application
 
-A repository containing the source files for a self-driving car model using neural networks.
+Developing a practically applicable model for a self-driving car
