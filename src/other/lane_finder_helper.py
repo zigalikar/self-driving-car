@@ -56,3 +56,40 @@ def average_slope_intercept(image, lines):
     left_line = make_coordinates(image, left_fit_average)
     right_line = make_coordinates(image, right_fit_average)
     return np.array([left_line, right_line])
+
+## Detects the lane in an image
+def detect_lanes_from_image(image):
+    canny = preprocess(image) # applying the filters to the image
+    cropped_image = region_of_interest(canny) # crop the image
+    lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength = 40, maxLineGap = 5) # apply the hough transform
+    average_lines = average_slope_intercept(image, lines)
+    line_image = display_lines(image, average_lines) # display lines on the black lane image
+    return cv2.addWeighted(image, 0.8, line_image, 1, 1) # combine the original lane image with the lines image
+
+## Processes an image
+def process_image(path):
+    ## Loading the test image
+    image = cv2.imread(path) # loading the image from file
+    lane_image = np.copy(image) # copy so changes on the image we edit do not change the original image
+
+    ## Processing the test image
+    processed_image = detect_lanes_from_image(lane_image)
+
+    ## Displaying the image
+    cv2.imshow('result', processed_image) # show the test image
+    cv2.waitKey(0) # wait until a key is pressed to hide the window
+
+## Processes a video
+def process_video(path):
+    ## Process the test video
+    cap = cv2.VideoCapture(path) # opens the test video
+    while (cap.isOpened()):
+        _, frame = cap.read() # reads each frame while the video is open
+        processed_frame = detect_lanes_from_image(frame)
+        cv2.imshow('result', processed_frame) # show the test image
+        if cv2.waitKey(1) == ord('a'): # wait until a key is pressed to hide the window
+            break
+
+    ## Dispose of the video capture
+    cap.release()
+    cv2.destroyAllWindows()
