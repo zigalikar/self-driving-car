@@ -12,8 +12,9 @@ def display_lines(image, lines):
     line_image = np.zeros_like(image)
     if lines is not None:
         for line in lines:
-            x1, y1, x2, y2 = line.reshape(4)
-            cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10) # draw a line segment on the black image we created
+            if line is not None:
+                x1, y1, x2, y2 = line.reshape(4)
+                cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10) # draw a line segment on the black image we created
 
     return line_image
 
@@ -29,12 +30,16 @@ def region_of_interest(image):
     return masked_image
 
 def make_coordinates(image, line_parameters):
-    slope, intercept = line_parameters # extract the slope and intercept from the parameters
-    y1 = image.shape[0] # height of the image - we want the line to start at the bottom of the image
-    y2 = int(y1 * (3/5)) # the lines go 3/5 of the way to the top of the image
-    x1 = int((y1 - intercept) / slope)
-    x2 = int((y2 - intercept) / slope)
-    return np.array([x1, y1, x2, y2])
+    try:
+        slope, intercept = line_parameters # extract the slope and intercept from the parameters
+        y1 = image.shape[0] # height of the image - we want the line to start at the bottom of the image
+        y2 = int(y1 * (3/5)) # the lines go 3/5 of the way to the top of the image
+        x1 = int((y1 - intercept) / slope)
+        x2 = int((y2 - intercept) / slope)
+        return np.array([x1, y1, x2, y2])
+    except TypeError:
+        # print('ERROR: Invalid parameters passed to make_coordinates function, exception: ' + str(te))
+        pass
 
 ## Averages left and right lines to get one left and one right line
 def average_slope_intercept(image, lines):
