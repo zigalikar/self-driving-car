@@ -98,3 +98,26 @@ def process_video(path):
     ## Dispose of the video capture
     cap.release()
     cv2.destroyAllWindows()
+
+## Processes a video stream/camera
+def process_stream():
+    cap = cv2.VideoCapture(0) # set up video capture on camera ID 0
+
+    while(True):
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+
+        # Process the frame
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        # Display the resulting frame
+        cv2.imshow('frame', gray)
+
+        # Wait until a key is pressed to hide the window
+        if cv2.waitKey(1) & 0xFF == ord('a'):
+            break
+
+    # Release the capture
+    cap.release()
+    cv2.destroyAllWindows()
+    pass
