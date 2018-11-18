@@ -1,4 +1,5 @@
 import cv2
+import sys
 import numpy as np
 
 ## Preprocesses the image
@@ -14,15 +15,20 @@ def display_lines(image, lines):
         for line in lines:
             if line is not None:
                 x1, y1, x2, y2 = line.reshape(4)
-                cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10) # draw a line segment on the black image we created
+                try:
+                    cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10) # draw a line segment on the black image we created
+                except:
+                    pass
 
     return line_image
 
 ## Returns the enclosed region of view
 def region_of_interest(image):
     height = image.shape[0] # get the height of the image
+    width = image.shape[1]
     polygons = np.array([
-        [(200, height), (1100, height), (550, 250)]
+        # [(200, height), (1100, height), (550, 250)]
+        [(0, height), (width, height), (550, 50)]
     ]) # create the region of interest - an array of polygons (1 polygon) because the fillPoly function requires an array
     mask = np.zeros_like(image) # creates an array of zeros with the same shape as the input image - create a BLACK mask
     cv2.fillPoly(mask, polygons, 255) # apply the triangle of color 255 (white) on the mask
@@ -45,28 +51,33 @@ def make_coordinates(image, line_parameters):
 def average_slope_intercept(image, lines):
     left_fit = []
     right_fit = []
-    for line in lines:
-        x1, y1, x2, y2 = line.reshape(4)
-        parameters = np.polyfit((x1, x2), (y1, y2), 1) # y = m * x + b -> get the slope and the y intercept
-        slope = parameters[0]
-        intercept = parameters[1]
-        if slope < 0: # left line
-            left_fit.append((slope, intercept))
-        else:
-            right_fit.append((slope, intercept))
 
-    # Average for both sides
-    left_fit_average = np.average(left_fit, axis = 0)
-    right_fit_average = np.average(right_fit, axis = 0)
-    left_line = make_coordinates(image, left_fit_average)
-    right_line = make_coordinates(image, right_fit_average)
-    return np.array([left_line, right_line])
+    if lines is not None:
+        for line in lines:
+            x1, y1, x2, y2 = line.reshape(4)
+            parameters = np.polyfit((x1, x2), (y1, y2), 1) # y = m * x + b -> get the slope and the y intercept
+            slope = parameters[0]
+            intercept = parameters[1]
+            if slope < 0: # left line
+                left_fit.append((slope, intercept))
+            else:
+                right_fit.append((slope, intercept))
+
+        # Average for both sides
+        left_fit_average = np.average(left_fit, axis = 0)
+        right_fit_average = np.average(right_fit, axis = 0)
+        left_line = make_coordinates(image, left_fit_average)
+        right_line = make_coordinates(image, right_fit_average)
+        return np.array([left_line, right_line])
+    
+    return np.array([])
 
 ## Detects the lane in an image
 def detect_lanes_from_image(image):
     canny = preprocess(image) # applying the filters to the image
     cropped_image = region_of_interest(canny) # crop the image
-    lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength = 40, maxLineGap = 5) # apply the hough transform
+    # lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength = 40, maxLineGap = 5) # apply the hough transform
+    lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 50, np.array([]), minLineLength = 40, maxLineGap = 5) # apply the hough transform
     average_lines = average_slope_intercept(image, lines)
     line_image = display_lines(image, average_lines) # display lines on the black lane image
     return cv2.addWeighted(image, 0.8, line_image, 1, 1) # combine the original lane image with the lines image
@@ -85,7 +96,7 @@ def process_image(path):
     cv2.waitKey(0) # wait until a key is pressed to hide the window
 
 ## Processes a video
-def process_video(path):
+def process_video_stream(path):
     ## Process the test video
     cap = cv2.VideoCapture(path) # opens the test video
     while (cap.isOpened()):
@@ -98,26 +109,3 @@ def process_video(path):
     ## Dispose of the video capture
     cap.release()
     cv2.destroyAllWindows()
-
-## Processes a video stream/camera
-def process_stream():
-    cap = cv2.VideoCapture(0) # set up video capture on camera ID 0
-
-    while(True):
-        # Capture frame-by-frame
-        ret, frame = cap.read()
-
-        # Process the frame
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        # Display the resulting frame
-        cv2.imshow('frame', gray)
-
-        # Wait until a key is pressed to hide the window
-        if cv2.waitKey(1) & 0xFF == ord('a'):
-            break
-
-    # Release the capture
-    cap.release()
-    cv2.destroyAllWindows()
-    pass

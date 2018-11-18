@@ -11,4 +11,7 @@ def start():
     # helper.process_image('data/lane_recognizer/test/IMG_20180906_063138.jpg')
 
     ## Processing a video
-    helper.process_video('data/lane_finder/lane_finder_test_video.mp4')
+    # helper.process_video('data/lane_finder/lane_finder_test_video.mp4')
+
+    ## Processing a video stream from camera ID 0
+    helper.process_video_stream(0)
